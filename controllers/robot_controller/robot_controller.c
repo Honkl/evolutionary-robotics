@@ -127,7 +127,7 @@ static void get_sensor_input() {
   int i;
   for (i=0; i<DISTANCE_SENSORS_NUMBER; i++) {
     distance_sensors_values[i] = wb_distance_sensor_get_value(distance_sensors[i]);
-    
+
     // scale the data in order to have a value between 0.0 and 1.0
     // 1.0 representing something to avoid, 0.0 representing nothing to avoid
     distance_sensors_values[i] /= 4096;
@@ -170,7 +170,7 @@ static void run_braitenberg() {
     speeds[i] = 0.0;
     for (j=0; j<DISTANCE_SENSORS_NUMBER; j++)
       speeds[i] += distance_sensors_values[j] * weights[j][i];
-    
+
     speeds[i] = offsets[i] + speeds[i]*MAX_SPEED;
     if (speeds[i] > MAX_SPEED)
       speeds[i] = MAX_SPEED;
@@ -196,23 +196,23 @@ static WbDeviceTag RECEIVER;
 static void get_emitter() {
   EMITTER = wb_robot_get_device("emitter");
   wb_emitter_set_range(EMITTER, 0.3);
-  
 
-  
+
+
   int channel = wb_emitter_get_channel(EMITTER);
   if (channel != EMITT_CHANNEL) {
     wb_emitter_set_channel(EMITTER, EMITT_CHANNEL);
-  } 
-  
+  }
+
 }
 
 static void get_receiver() {
   RECEIVER = wb_robot_get_device("receiver");
-  wb_receiver_enable(RECEIVER, TIME_STEP);  
-  
+  wb_receiver_enable(RECEIVER, TIME_STEP);
+
   //WbFieldRef aperture = wb_supervisor_node_get_field(RECEIVER, "aperture");
   //wb_supervisor_field_set_sf_float(aperture, -1);
-  
+
   int channel = wb_receiver_get_channel(RECEIVER);
   if (channel != RECEIVE_CHANNEL) {
     wb_receiver_get_channel(RECEIVER, RECEIVE_CHANNEL);
@@ -220,18 +220,18 @@ static void get_receiver() {
 }
 
 static void emitt_message() {
-  const char *message = "AKC";  
+  const char *message = "AKC";
   printf("Sending ACK\n");
   wb_emitter_send(EMITTER, message, strlen(message) + 1);
 }
 
-static void receive_message() {  
+static void receive_message() {
 
   /* is there at least one packet in the receiver's queue ? */
   while (wb_receiver_get_queue_length(RECEIVER) > 0) {
 
         /* read current packet's data */
-      const char *buffer = wb_receiver_get_data(RECEIVER);    
+      const char *buffer = wb_receiver_get_data(RECEIVER);
       printf("E-puck recharged %s\n", buffer);
       epuck_energy++;
       emitt_message();
@@ -245,20 +245,20 @@ static void receive_message() {
 
 int main(int argc, char **argv) {
   wb_robot_init();
-  
+
   printf("E-puck robot controller started...\n");
-  
+
   init_devices();
 
   get_emitter();
   get_receiver();
 
   double time = wb_robot_get_time();
-  while (wb_robot_step(TIME_STEP) != -1) { 
+  while (wb_robot_step(TIME_STEP) != -1) {
 
     reset_actuator_values();
     get_sensor_input();
-    
+
     receive_message();
 
     blink_leds();
@@ -278,6 +278,6 @@ int main(int argc, char **argv) {
 
     //step();
   };
-  
+
   return EXIT_SUCCESS;
 }
