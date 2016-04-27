@@ -2,8 +2,8 @@
 WorldInfo {
 }
 Viewpoint {
-  orientation -0.343487 0.866659 0.361827 1.47174
-  position 1.19721 1.01796 0.319911
+  orientation -0.32883 -0.91476 -0.234703 1.91887
+  position -1.53403 1.43804 -0.427165
 }
 Background {
   skyColor [
@@ -11,10 +11,21 @@ Background {
   ]
 }
 DirectionalLight {
+  direction 0.1 -0.2 -1
+}
+DirectionalLight {
+  direction -0.8 0.2 0.3
+}
+DirectionalLight {
+  direction 1.3 0.3 -0.5
+}
+DirectionalLight {
   ambientIntensity 1
-  direction 0.1 -0.5 0.3
+  direction 0.3 -0.5 0.6
 }
 RectangleArena {
+  translation -0.0610336 1.22125e-14 -0.0557123
+  wallHeight 0.3
 }
 DEF GA Supervisor {
   children [
@@ -29,19 +40,22 @@ DEF GA Supervisor {
   controller "advanced_genetic_algorithm_supervisor"
 }
 DEF ROBOT E-puck {
-  hidden linearVelocity_0 -0.0270118 -1.2408e-06 -0.0530651
-  hidden angularVelocity_0 -0.0105595 -0.0142862 0.00539879
-  hidden translation_1 -0.0260077 0.0200066 1.3602e-07
-  hidden rotation_1 1 0.000185498 0.000319729 1.41263
-  hidden linearVelocity_1 -0.0272081 -1.7867e-06 -0.0534495
-  hidden angularVelocity_1 -2.67378 -0.0146119 1.36103
-  hidden translation_2 0.0260075 0.0200058 -1.68837e-07
-  hidden rotation_2 1 -0.000542663 -0.000728924 -0.300141
-  hidden linearVelocity_2 -0.0268698 -9.14696e-07 -0.0527863
-  hidden angularVelocity_2 -2.63768 -0.0145866 1.34269
-  translation 0.153941 -6.8784e-05 -0.405952
-  rotation 0.00399761 0.999992 -0.000924177 0.470471
+  hidden linearVelocity_0 -0.0493709 -3.22157e-06 -0.0248993
+  hidden angularVelocity_0 0.0433672 -0.0640072 -0.0861717
+  hidden translation_1 -0.0260183 0.0200304 -5.62814e-06
+  hidden rotation_1 1 0.000661789 0.000694913 -2.31564
+  hidden linearVelocity_1 -0.050424 -5.36561e-07 -0.0254326
+  hidden angularVelocity_1 -1.27497 -0.0639575 2.52789
+  hidden translation_2 0.0260167 0.0200344 5.32792e-06
+  hidden rotation_2 0.999999 0.000582797 0.00096979 1.79732
+  hidden linearVelocity_2 -0.04745 -4.07358e-06 -0.0239313
+  hidden angularVelocity_2 -1.19333 -0.063944 2.366
+  translation -0.225385 -9.49127e-05 0.117588
+  rotation 0.000238451 1 -0.000237499 1.1019
   controller "robot_controller"
+  camera_width 2
+  camera_height 2
+  camera_rotation 0.57735 0.57735 0.57735 0
   emitter_channel 2
 }
 DEF CHARGER1 Supervisor {

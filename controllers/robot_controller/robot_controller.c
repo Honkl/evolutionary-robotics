@@ -10,7 +10,9 @@
 #include <webots/differential_wheels.h>
 #include <webots/distance_sensor.h>
 #include <webots/emitter.h>
+#include <webots/receiver.h>
 #include <webots/device.h>
+#include <webots/camera.h>
 #include <webots/led.h>
 #include <webots/robot.h>
 #include <webots/nodes.h>
@@ -215,7 +217,7 @@ static void get_receiver() {
 
   int channel = wb_receiver_get_channel(RECEIVER);
   if (channel != RECEIVE_CHANNEL) {
-    wb_receiver_get_channel(RECEIVER, RECEIVE_CHANNEL);
+    wb_receiver_set_channel(RECEIVER, RECEIVE_CHANNEL);
   }
 }
 
@@ -252,6 +254,9 @@ int main(int argc, char **argv) {
 
   get_emitter();
   get_receiver();
+  
+WbDeviceTag camera = wb_robot_get_device("camera");
+wb_camera_enable(camera,100);
 
   double time = wb_robot_get_time();
   while (wb_robot_step(TIME_STEP) != -1) {
@@ -281,3 +286,4 @@ int main(int argc, char **argv) {
 
   return EXIT_SUCCESS;
 }
+
