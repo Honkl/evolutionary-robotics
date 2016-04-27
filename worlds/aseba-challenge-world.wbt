@@ -17,8 +17,8 @@ DirectionalLight {
 RectangleArena {
 }
 DEF ROBOT DifferentialWheels {
-  translation -0.282701 0.000568298 0.0559181
-  rotation 0.0145017 0.999533 0.0269101 4.33445
+  translation -0.376027 0.000777097 0.189205
+  rotation 0.027041 0.999366 -0.0231565 4.69036
   children [
     DEF EMITTER Emitter {
       range 0.2
@@ -41,8 +41,8 @@ DEF ROBOT DifferentialWheels {
       ]
     }
     DEF LEFT_WHEEL Solid {
-      translation -0.0457924 0.0239947 7.64084e-06
-      rotation 0.999824 -0.0128327 -0.013687 -2.45452
+      translation -0.0460385 0.0238584 -3.86993e-05
+      rotation 0.999856 -0.00607817 -0.0158593 2.81952
       children [
         DEF WHEEL Transform {
           rotation 0 0 1 1.57
@@ -67,20 +67,20 @@ DEF ROBOT DifferentialWheels {
         density -1
         mass 0.05
       }
-      linearVelocity -0.0312333 -0.000168006 -0.0133126
-      angularVelocity -0.606811 1.27719 1.51692
+      linearVelocity 0.000861507 -5.98806e-05 -0.150254
+      angularVelocity -5.99923 0.0544911 -0.0333609
     }
     DEF RIGHT_WHEEL Solid {
-      translation 0.0455951 0.024491 -8.17961e-05
-      rotation 0.999918 -0.0116438 0.00536393 -0.208633
+      translation 0.0459136 0.0241842 -3.29912e-05
+      rotation 0.999905 -0.0121355 0.00649234 0.576381
       children [
         USE WHEEL
       ]
       name "right wheel"
       boundingObject USE WHEEL
       physics USE PHYSICS_WHEEL
-      linearVelocity 0.0840361 -0.00014372 0.0377476
-      angularVelocity 1.61803 1.38215 -3.60492
+      linearVelocity 0.000846663 1.82267e-05 -0.149585
+      angularVelocity -5.99654 0.0839855 -0.16901
     }
     DEF LEFT_EYE DistanceSensor {
       translation -0.02 0.063 -0.042

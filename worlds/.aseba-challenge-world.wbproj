@@ -6,4 +6,4 @@ minimizedPerspectives:
 maximizedDockId: -1
 centralWidgetVisible: 1
 orthographicViewHeight: 0.781343
-textFiles: 1 "controllers/charger_controller/charger_controller.c" "controllers/robot_controller/robot_controller.c"
+textFiles: 0 "controllers/charger_controller/charger_controller.c" "controllers/robot_controller/robot_controller.c"

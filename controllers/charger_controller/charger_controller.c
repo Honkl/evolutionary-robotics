@@ -72,7 +72,7 @@ void get_emitter() {
 
 void get_receiver() {
   RECEIVER = wb_robot_get_device("receiver");
-  wb_receiver_enable(RECEIVER);  
+  wb_receiver_enable(RECEIVER, TIME_STEP);
   int channel = wb_receiver_get_channel(RECEIVER);
   if (channel != RECEIVE_CHANNEL) {
     wb_receiver_get_channel(RECEIVER, RECEIVE_CHANNEL);
