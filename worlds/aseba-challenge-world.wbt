@@ -2,8 +2,8 @@
 WorldInfo {
 }
 Viewpoint {
-  orientation -0.420372 0.854966 0.303844 1.38334
-  position 3.18506 2.77106 1.07815
+  orientation -0.398784 0.864179 0.306863 1.43492
+  position 3.28337 2.75371 0.922804
 }
 Background {
   skyColor [
@@ -16,178 +16,15 @@ DirectionalLight {
 }
 RectangleArena {
 }
-DEF ROBOT DifferentialWheels {
-  translation -0.376027 0.000777097 0.189205
-  rotation 0.027041 0.999366 -0.0231565 4.69036
-  children [
-    DEF EMITTER Emitter {
-      range 0.2
-      channel 2
-    }
-    DEF MAIN_BODY Transform {
-      translation 0 0.0415 0
-      children [
-        Shape {
-          appearance Appearance {
-            material Material {
-              diffuseColor 0.0820075 0.364731 0.8
-            }
-          }
-          geometry DEF BODY Cylinder {
-            height 0.08
-            radius 0.045
-          }
-        }
-      ]
-    }
-    DEF LEFT_WHEEL Solid {
-      translation -0.0460385 0.0238584 -3.86993e-05
-      rotation 0.999856 -0.00607817 -0.0158593 2.81952
-      children [
-        DEF WHEEL Transform {
-          rotation 0 0 1 1.57
-          children [
-            Shape {
-              appearance Appearance {
-                material Material {
-                  diffuseColor 1 0 0
-                }
-              }
-              geometry Cylinder {
-                height 0.01
-                radius 0.025
-              }
-            }
-          ]
-        }
-      ]
-      name "left wheel"
-      boundingObject USE WHEEL
-      physics DEF PHYSICS_WHEEL Physics {
-        density -1
-        mass 0.05
-      }
-      linearVelocity 0.000861507 -5.98806e-05 -0.150254
-      angularVelocity -5.99923 0.0544911 -0.0333609
-    }
-    DEF RIGHT_WHEEL Solid {
-      translation 0.0459136 0.0241842 -3.29912e-05
-      rotation 0.999905 -0.0121355 0.00649234 0.576381
-      children [
-        USE WHEEL
-      ]
-      name "right wheel"
-      boundingObject USE WHEEL
-      physics USE PHYSICS_WHEEL
-      linearVelocity 0.000846663 1.82267e-05 -0.149585
-      angularVelocity -5.99654 0.0839855 -0.16901
-    }
-    DEF LEFT_EYE DistanceSensor {
-      translation -0.02 0.063 -0.042
-      rotation 0 1 0 2.07
-      children [
-        DEF SENSOR Transform {
-          rotation 0 0 1 1.57
-          children [
-            Shape {
-              appearance Appearance {
-                material Material {
-                  diffuseColor 0.975691 0.981481 0.0252992
-                }
-              }
-              geometry Cylinder {
-                height 0.004
-                radius 0.008
-              }
-            }
-          ]
-        }
-      ]
-      name "ds0"
-      lookupTable [
-        0 1024 0
-        0.05 1024 0
-        0.15 0 0
-      ]
-      numberOfRays 2
-      aperture 1
-    }
-    DEF RIGHT_EYE DistanceSensor {
-      translation 0.02 0.063 -0.042
-      rotation 0 1 0 1.07
-      children [
-        USE SENSOR
-      ]
-      name "ds1"
-      lookupTable [
-        0 1024 0
-        0.05 1024 0
-        0.15 0 0
-      ]
-      numberOfRays 2
-      aperture 1
-    }
-    DEF MOUTH Shape {
-      appearance Appearance {
-        material Material {
-        }
-        texture ImageTexture {
-          url [
-            "textures/mybot.png"
-          ]
-        }
-      }
-      geometry IndexedFaceSet {
-        coord Coordinate {
-          point [
-            0.015 0.038 -0.041
-            0.015 0.023 -0.041
-            0 0.023 -0.0455
-            -0.015 0.023 -0.041
-            -0.015 0.038 -0.041
-            0 0.038 -0.0455
-          ]
-        }
-        texCoord TextureCoordinate {
-          point [
-            0 0
-            0.5 0
-            1 0
-            1 1
-            0.5 1
-            0 1
-          ]
-        }
-        coordIndex [
-          0, 1, 2, 5, -1, 5, 2, 3, 4, -1
-        ]
-        texCoordIndex [
-          5, 0, 1, 4, -1, 4, 1, 2, 3, -1
-        ]
-        creaseAngle 0.9
-      }
-    }
-    DEF RECEIVER Receiver {
-      translation 0 0.06 0
-      rotation -3.69933e-05 -0.608762 0.793353 3.14165
-      channel 1
-    }
-  ]
-  name "MyBot receiver"
-  boundingObject DEF MYBOT_BOUNDING Transform {
-    translation 0 0.0415 0
-    children [
-      USE BODY
-    ]
-  }
-  physics DEF MYBOT_PHYSICS Physics {
-    density -1
-    mass 0.5
-  }
+E-puck {
+  hidden translation_1 -0.0260075 0.0200042 2.2466e-07
+  hidden rotation_1 1 -0.00012763 0.000204305 -2.83664
+  hidden translation_2 0.0260073 0.0200033 -2.31343e-07
+  hidden rotation_2 1 -3.9316e-05 0.000221717 1.2072
+  translation -0.426492 -8.52967e-05 0.0511032
+  rotation -0.00385359 0.999992 -0.000942568 5.78855
   controller "robot_controller"
-  axleLength 0.09
-  wheelRadius 0.025
-  speedUnit 0.1
+  emitter_channel 2
 }
 DEF CHARGER1 Supervisor {
   translation 0.165755 -0.01 0.202839

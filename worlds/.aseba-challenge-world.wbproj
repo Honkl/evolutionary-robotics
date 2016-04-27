@@ -5,5 +5,6 @@ sceneTreePerspectives: 000000ff0000000100000002000000c00000006c01000000060100000
 minimizedPerspectives: 
 maximizedDockId: -1
 centralWidgetVisible: 1
-orthographicViewHeight: 0.781343
-textFiles: 0 "controllers/charger_controller/charger_controller.c" "controllers/robot_controller/robot_controller.c"
+orthographicViewHeight: 0.945425
+textFiles: 1 "controllers/charger_controller/charger_controller.c" "controllers/robot_controller/robot_controller.c"
+renderingDevicePerspectives: 308;1;1;0.029703;0.0321317

@@ -62,7 +62,7 @@ WbDeviceTag RECEIVER;
 
 void get_emitter() {
   EMITTER = wb_robot_get_device("emitter");
-  wb_emitter_set_range(EMITTER, 0.2);
+  wb_emitter_set_range(EMITTER, 0.15);
   
   int channel = wb_emitter_get_channel(EMITTER);
   if (channel != EMITT_CHANNEL) {
