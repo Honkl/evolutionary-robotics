@@ -210,6 +210,11 @@ int main(int argc, const char *argv[]) {
   // WbNodeRef load = wb_supervisor_node_get_from_def("LOAD");
   // load_translation = wb_supervisor_node_get_field(load, "translation");
   // memcpy(load_trans0, wb_supervisor_field_get_sf_vec3f(load_translation), sizeof(load_trans0));
+  printf("%s", "jsem pica");  
+  WbFieldRef dataField = wb_supervisor_node_get_field(robot, "data");
+  const char* xx = wb_supervisor_field_get_sf_string(dataField);
+  wb_supervisor_field_set_sf_string(dataField, "kurva6");
+  printf("%s", xx);
   
   if (demo)
     run_demo();

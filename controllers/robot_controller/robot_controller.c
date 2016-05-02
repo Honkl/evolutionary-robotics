@@ -254,6 +254,11 @@ int main(int argc, char **argv) {
 
   get_emitter();
   get_receiver();
+
+  wb_robot_set_data("hello");  
+  char* x = wb_robot_get_data();
+  printf("%s", x);
+
   
 WbDeviceTag camera = wb_robot_get_device("camera");
 wb_camera_enable(camera,100);
