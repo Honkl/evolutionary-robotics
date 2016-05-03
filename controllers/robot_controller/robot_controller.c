@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include <webots/differential_wheels.h>
 #include <webots/distance_sensor.h>
@@ -19,6 +20,10 @@
 
 /* Device stuff */
 #define DISTANCE_SENSORS_NUMBER 8
+#define NUM_INPUT 4
+#define NUM_HIDDEN 3
+#define NUM_OUTPUT 2
+
 static WbDeviceTag distance_sensors[DISTANCE_SENSORS_NUMBER];
 static double distance_sensors_values[DISTANCE_SENSORS_NUMBER];
 static const char *distance_sensors_names[DISTANCE_SENSORS_NUMBER] = {
@@ -68,6 +73,47 @@ static int EMITT_CHANNEL = 2;
 static int RECEIVE_CHANNEL = 1;
 static WbDeviceTag EMITTER;
 static WbDeviceTag RECEIVER;
+
+static double * forwardPass(double input[NUM_INPUT], double W1[NUM_HIDDEN][NUM_INPUT], 
+    double W2[NUM_OUTPUT][NUM_HIDDEN], double b1[NUM_HIDDEN], double b2[NUM_OUTPUT]) {
+
+    int row, column;
+    double output_hidden[NUM_HIDDEN];
+    for (column = 0; column < NUM_HIDDEN; column++) {
+        output_hidden[column] = 0;    
+    }
+
+    double * output = (double*) malloc(NUM_OUTPUT * sizeof(double));;
+    for (column = 0; column < NUM_OUTPUT; column++) {
+        output[column] = 0;    
+    }
+    
+    // x * W1
+    for (row = 0; row < NUM_HIDDEN; row++) {
+        for (column = 0; column < NUM_INPUT; column++) {
+            output_hidden[row] = output_hidden[row] + W1[row][column]*input[column];
+        }
+    }
+    
+    // output_hidden = tanh( x * W1 + b1)
+    for (column = 0; column < NUM_HIDDEN; column++) {
+        output_hidden[column] = tanh(output_hidden[column] + b1[column]);
+    }
+
+    // output_hidden * W2
+    for (row = 0; row < NUM_OUTPUT; row++) {
+        for (column = 0; column < NUM_HIDDEN; column++) {
+            output[row] = output[row] + W2[row][column]*output_hidden[column];
+        }
+    }
+
+    // tanh( output_hidden * W2)
+    for (column = 0; column < NUM_OUTPUT; column++) {
+        output[column] = tanh(output[column] + b2[column]);
+    }
+
+    return output;
+}
 
 static int get_time_step() {
   static int time_step = -1;
