@@ -35,7 +35,7 @@ const char* name2 = "CHARGER2.BODY.SHAPE.APPEREANCE.MATERIAL";
 void set_color_field(const double* colors) { 
   WbFieldRef material;
 
-  printf("%s\n", wb_robot_get_name());
+  //printf("%s\n", wb_robot_get_name());
 
   if(strcmp(wb_robot_get_name(), "CHARGER1") == 0) {
     material = wb_supervisor_node_get_from_def(name1);    
@@ -86,8 +86,8 @@ void emitt_message() {
   const char message[15];
 
   sprintf(message, "%d", message_number);
-  printf("Sending message ");
-  printf("%s\n", message);
+  //printf("Sending message ");
+  //printf("%s\n", message);
 
   wb_emitter_send(EMITTER, message, strlen(message) + 1);
 }
@@ -98,7 +98,7 @@ void receive_message() {
 
         /* read current packet's data */
       const char *buffer = wb_receiver_get_data(RECEIVER);    
-      printf("ACK Received\n"); //%s\"\n", buffer);
+      //printf("ACK Received\n"); //%s\"\n", buffer);
       energy--;
         /* fetch next packet */
       wb_receiver_next_packet(RECEIVER);
@@ -158,8 +158,8 @@ int main(int argc, char **argv)
       }
         
       
-      printf("Energy: ");
-      printf("%d\n", energy); 
+      //printf("Energy: ");
+      //printf("%d\n", energy); 
     }   
   }
   

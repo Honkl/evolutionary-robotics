@@ -2,8 +2,8 @@
 WorldInfo {
 }
 Viewpoint {
-  orientation -0.0306174 -0.837282 -0.545914 3.25385
-  position 0.184424 2.22874 -1.03963
+  orientation 0.041363 -0.918365 -0.393568 3.62761
+  position 0.866132 1.88518 -1.44336
 }
 Background {
   skyColor [
@@ -42,7 +42,6 @@ DEF ROBOT E-puck {
   translation -0.00192903 -0.000113055 0.00676903
   rotation -1.55272e-05 1 -1.29249e-05 1.7296
   controller "robot_controller"
-  controllerArgs "controoooolerargs"
   camera_width 4
   camera_height 1
   camera_rotation 0.57735 0.57735 0.57735 0

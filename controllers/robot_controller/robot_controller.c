@@ -66,6 +66,8 @@ static double offsets[2] = {
 static int epuck_energy = 10;
 static int EMITT_CHANNEL = 2;
 static int RECEIVE_CHANNEL = 1;
+static WbDeviceTag EMITTER;
+static WbDeviceTag RECEIVER;
 
 static int get_time_step() {
   static int time_step = -1;
@@ -113,7 +115,6 @@ static void init_devices() {
       }
     }
   }
-
   step();
 }
 
@@ -191,29 +192,19 @@ static void turn_left() {
   //passive_wait(0.2);
 }
 
-
-static WbDeviceTag EMITTER;
-static WbDeviceTag RECEIVER;
-
 static void get_emitter() {
   EMITTER = wb_robot_get_device("emitter");
   wb_emitter_set_range(EMITTER, 0.3);
-
-
 
   int channel = wb_emitter_get_channel(EMITTER);
   if (channel != EMITT_CHANNEL) {
     wb_emitter_set_channel(EMITTER, EMITT_CHANNEL);
   }
-
 }
 
 static void get_receiver() {
   RECEIVER = wb_robot_get_device("receiver");
   wb_receiver_enable(RECEIVER, TIME_STEP);
-
-  //WbFieldRef aperture = wb_supervisor_node_get_field(RECEIVER, "aperture");
-  //wb_supervisor_field_set_sf_float(aperture, -1);
 
   int channel = wb_receiver_get_channel(RECEIVER);
   if (channel != RECEIVE_CHANNEL) {
@@ -223,18 +214,17 @@ static void get_receiver() {
 
 static void emitt_message() {
   const char *message = "AKC";
-  printf("Sending ACK\n");
+  //printf("Sending ACK\n");
   wb_emitter_send(EMITTER, message, strlen(message) + 1);
 }
 
 static void receive_message() {
-
   /* is there at least one packet in the receiver's queue ? */
   while (wb_receiver_get_queue_length(RECEIVER) > 0) {
 
         /* read current packet's data */
       const char *buffer = wb_receiver_get_data(RECEIVER);
-      printf("E-puck recharged %s\n", buffer);
+      //printf("E-puck recharged %s\n", buffer);
       epuck_energy++;
       emitt_message();
 
@@ -243,29 +233,49 @@ static void receive_message() {
   }
 }
 
+static char* read_line_from_file(char* file_name) {  
+  FILE *infile = fopen(file_name, "r");
+  if (! infile) {
+    printf("unable to read %s\n", file_name);
+    return;
+  }
 
+  char line[256];
+  char* result = malloc(sizeof(char));
+  while (fgets(line, sizeof(line), infile)) {
+  }
+  fclose(infile);
+
+  result = &line;
+  return result;
+}
+
+static void write_fitness_to_file() {
+  const char* file_name = "../advanced_genetic_algorithm_supervisor/fitness.txt";
+  FILE *outfile = fopen(file_name, "w");
+  double my_fitness = 123;
+  fprintf(outfile, "%lf", my_fitness);
+  fclose(outfile);
+}
 
 int main(int argc, char **argv) {
   wb_robot_init();
 
-  printf("E-puck robot controller started...\n");
-
-  init_devices();
-
+  init_devices();  
   get_emitter();
   get_receiver();
 
-  wb_robot_set_data("hello");  
-  char* x = wb_robot_get_data();
-  printf("%s", x);
+  WbDeviceTag camera = wb_robot_get_device("camera");
+  wb_camera_enable(camera,100);
 
-  
-WbDeviceTag camera = wb_robot_get_device("camera");
-wb_camera_enable(camera,100);
+  printf("E-puck robot controller started...\n");
+
+  const char* file_name = "../advanced_genetic_algorithm_supervisor/genotype.txt";
+  const char* neural_network = read_line_from_file(file_name); // contains our genotype (neural network)
+  printf("Neural network: %s", neural_network);
 
   double time = wb_robot_get_time();
   while (wb_robot_step(TIME_STEP) != -1) {
-
     reset_actuator_values();
     get_sensor_input();
 
@@ -282,11 +292,12 @@ wb_camera_enable(camera,100);
 
     double current_time = wb_robot_get_time();
     if (current_time - time > 1) {
-      printf("%d\n", epuck_energy);
+      //printf("%d\n", epuck_energy);
       time = current_time;
     }
 
-    //step();
+    write_fitness_to_file();
+
   };
 
   return EXIT_SUCCESS;

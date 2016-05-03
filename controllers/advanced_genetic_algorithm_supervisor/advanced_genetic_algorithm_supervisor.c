@@ -80,9 +80,30 @@ void run_seconds(double seconds) {
   }
 }
 
+void write_nn_to_file() {
+  const char* file_name = "genotype.txt";
+  FILE *outfile = fopen(file_name, "w");
+  fprintf(outfile, "NEURAL NETWORK\n");
+  fclose(outfile);
+}
+
+double read_fitness() {
+  const char* file_name = "fitness.txt";
+  FILE *infile = fopen(file_name, "r");
+  if (! infile) {
+    printf("unable to read %s\n", file_name);
+    return;
+  }
+  double fitness = 0;
+  fscanf(infile, "%lf", &fitness);
+  fclose(infile);
+  return fitness;
+}
+
 // compute fitness as the euclidian distance that the load was pushed
 double measure_fitness() {
-  return 0;
+  return read_fitness();
+
   // const double *load_trans = wb_supervisor_field_get_sf_vec3f(load_translation);
   // double dx = load_trans[X] - load_trans0[X];
   // double dz = load_trans[Z] - load_trans0[Z];
@@ -93,7 +114,7 @@ double measure_fitness() {
 void evaluate_genotype(Genotype genotype) {
   
   // send genotype to robot for evaluation
-  wb_emitter_send(emitter, genotype_get_genes(genotype), GENOTYPE_SIZE * sizeof(double));
+  // wb_emitter_send(emitter, genotype_get_genes(genotype), GENOTYPE_SIZE * sizeof(double));
   
   // reset robot and load position
   // wb_supervisor_field_set_sf_vec3f(robot_translation, robot_trans0);
@@ -101,7 +122,7 @@ void evaluate_genotype(Genotype genotype) {
   // wb_supervisor_field_set_sf_vec3f(load_translation, load_trans0);
 
   // evaluation genotype during one minute
-  run_seconds(60.0);
+  run_seconds(60.0);  
   
   // measure fitness
   double fitness = measure_fitness();
@@ -160,7 +181,6 @@ void run_optimization() {
 void run_demo() {
   wb_robot_keyboard_enable(time_step);
   
-  printf("---\n");
   printf("running demo of best individual ...\n");
   printf("select the 3D window and push the 'O' key\n");
   printf("to start genetic algorithm optimization\n");
@@ -175,8 +195,10 @@ void run_demo() {
   genotype_fread(genotype, infile);
   fclose(infile);
   
-  while (demo)
-    evaluate_genotype(genotype);
+
+  while (demo) {      
+     evaluate_genotype(genotype);    
+  }
 }
 
 int main(int argc, const char *argv[]) {
@@ -206,16 +228,15 @@ int main(int argc, const char *argv[]) {
 //  memcpy(robot_trans0, wb_supervisor_field_get_sf_vec3f(robot_translation), sizeof(robot_trans0));
 //  memcpy(robot_rot0, wb_supervisor_field_get_sf_rotation(robot_rotation), sizeof(robot_rot0));
 
-  // find load node and store initial position
-  // WbNodeRef load = wb_supervisor_node_get_from_def("LOAD");
-  // load_translation = wb_supervisor_node_get_field(load, "translation");
-  // memcpy(load_trans0, wb_supervisor_field_get_sf_vec3f(load_translation), sizeof(load_trans0));
-  printf("%s", "jsem pica");  
-  WbFieldRef dataField = wb_supervisor_node_get_field(robot, "data");
-  const char* xx = wb_supervisor_field_get_sf_string(dataField);
-  wb_supervisor_field_set_sf_string(dataField, "kurva6");
-  printf("%s", xx);
-  
+// find load node and store initial position
+// WbNodeRef load = wb_supervisor_node_get_from_def("LOAD");
+// load_translation = wb_supervisor_node_get_field(load, "translation");
+// memcpy(load_trans0, wb_supervisor_field_get_sf_vec3f(load_translation), sizeof(load_trans0));    
+
+
+  // prepare neural network for e-puck
+  write_nn_to_file();
+
   if (demo)
     run_demo();
 
