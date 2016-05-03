@@ -2,8 +2,8 @@
 WorldInfo {
 }
 Viewpoint {
-  orientation 0.041363 -0.918365 -0.393568 3.62761
-  position 0.866132 1.88518 -1.44336
+  orientation 0.0299375 -0.874554 -0.484004 3.4853
+  position 0.67501 2.23927 -1.14639
 }
 Background {
   skyColor [
@@ -48,7 +48,7 @@ DEF ROBOT E-puck {
   emitter_channel 2
 }
 DEF CHARGER1 Supervisor {
-  translation 0.196846 -0.01 0.202762
+  translation 0.2 -0.01 0.2
   children [
     DEF RECEIVER Receiver {
       channel 2
@@ -87,7 +87,7 @@ DEF CHARGER1 Supervisor {
   controller "charger_controller"
 }
 DEF CHARGER2 Supervisor {
-  translation -0.187694 -0.01 -0.19292
+  translation -0.2 -0.01 -0.2
   children [
     DEF RECEIVER Receiver {
       channel 2

@@ -2,6 +2,7 @@
 
 #include "genotype.h"
 #include "population.h"
+#include "random.h"
 #include <webots/supervisor.h>
 #include <webots/robot.h>
 #include <webots/emitter.h>
@@ -35,10 +36,6 @@ static WbFieldRef robot_translation;
 static WbFieldRef robot_rotation;
 static double robot_trans0[3];  // a translation needs 3 doubles
 static double robot_rot0[4];    // a rotation needs 4 doubles
-  
-// for reading or setting the load's position
-static WbFieldRef load_translation;
-static double load_trans0[3];
   
 // start with a demo until the user presses the 'O' key
 // (change this if you want)
@@ -92,7 +89,7 @@ double read_fitness() {
   FILE *infile = fopen(file_name, "r");
   if (! infile) {
     printf("unable to read %s\n", file_name);
-    return;
+    return -1;
   }
   double fitness = 0;
   fscanf(infile, "%lf", &fitness);
@@ -100,7 +97,6 @@ double read_fitness() {
   return fitness;
 }
 
-// compute fitness as the euclidian distance that the load was pushed
 double measure_fitness() {
   return read_fitness();
 
@@ -110,16 +106,39 @@ double measure_fitness() {
   // return sqrt(dx * dx + dz * dz);
 }
 
+bool is_in_circle(double circle_x, double circle_y, double radius, double point_x, double point_y) {
+  return (pow(point_x - circle_x, 2) + pow(point_y - circle_y, 2) <= pow(radius, 2));
+}
+
 // evaluate one genotype at a time
 void evaluate_genotype(Genotype genotype) {
+
+  // reset robot position
+  double x1 = 0.2;
+  double z1 = 0.2;
+  double x2 = -0.2;
+  double z2 = -0.2;
+  double radius = 0.05;
+
+  double x = 0.8 * random_get_uniform() - 0.4;
+  double z = 0.8 * random_get_uniform() - 0.4; // "z" is standard "y" coordinate here...
   
-  // send genotype to robot for evaluation
-  // wb_emitter_send(emitter, genotype_get_genes(genotype), GENOTYPE_SIZE * sizeof(double));
-  
-  // reset robot and load position
-  // wb_supervisor_field_set_sf_vec3f(robot_translation, robot_trans0);
-  // wb_supervisor_field_set_sf_rotation(robot_rotation, robot_rot0);
-  // wb_supervisor_field_set_sf_vec3f(load_translation, load_trans0);
+  robot_trans0[0] = x;
+  robot_trans0[1] = 0;
+  robot_trans0[2] = z;
+
+  if (is_in_circle(x1, z1, radius, x, z) || is_in_circle(x2, z2, radius, x, z)) {
+    robot_trans0[0] = 0;
+    robot_trans0[2] = 0;
+  }
+
+  robot_rot0[0] = 0;
+  robot_rot0[1] = 1;
+  robot_rot0[2] = 0;
+  robot_rot0[3] = 360 * random_get_uniform() - 180;
+
+  wb_supervisor_field_set_sf_vec3f(robot_translation, robot_trans0);
+  wb_supervisor_field_set_sf_rotation(robot_rotation, robot_rot0);
 
   // evaluation genotype during one minute
   run_seconds(60.0);  
@@ -225,14 +244,9 @@ int main(int argc, const char *argv[]) {
   WbNodeRef robot = wb_supervisor_node_get_from_def("ROBOT");
   robot_translation = wb_supervisor_node_get_field(robot, "translation");
   robot_rotation = wb_supervisor_node_get_field(robot, "rotation");
-//  memcpy(robot_trans0, wb_supervisor_field_get_sf_vec3f(robot_translation), sizeof(robot_trans0));
-//  memcpy(robot_rot0, wb_supervisor_field_get_sf_rotation(robot_rotation), sizeof(robot_rot0));
-
-// find load node and store initial position
-// WbNodeRef load = wb_supervisor_node_get_from_def("LOAD");
-// load_translation = wb_supervisor_node_get_field(load, "translation");
-// memcpy(load_trans0, wb_supervisor_field_get_sf_vec3f(load_translation), sizeof(load_trans0));    
-
+  
+  memcpy(robot_trans0, wb_supervisor_field_get_sf_vec3f(robot_translation), sizeof(robot_trans0));
+  memcpy(robot_rot0, wb_supervisor_field_get_sf_rotation(robot_rotation), sizeof(robot_rot0));
 
   // prepare neural network for e-puck
   write_nn_to_file();
