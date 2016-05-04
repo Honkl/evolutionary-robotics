@@ -3,7 +3,7 @@
  * Date:          25.04.2016
  * Description:   A basic controller for Aseba-challenge charger.
  * Author:        Jan Kluj, Jakub Naplava, Ondrej Svec
- * Modifications: 
+ * Modifications:
  */
 
 /*
@@ -13,6 +13,7 @@
 #include <webots/supervisor.h>
 #include <webots/robot.h>
 #include <webots/emitter.h>
+#include <webots/receiver.h>
 #include <webots/display.h>
 #include <string.h>
 #include <stdlib.h>
@@ -32,27 +33,27 @@ int energy = 5;
 const char* name1 = "CHARGER1.BODY.SHAPE.APPEREANCE.MATERIAL";
 const char* name2 = "CHARGER2.BODY.SHAPE.APPEREANCE.MATERIAL";
 
-void set_color_field(const double* colors) { 
-  WbFieldRef material;
-
-  //printf("%s\n", wb_robot_get_name());
+void set_color_field(const double* colors) {
+  const char* chosenName = "";
 
   if(strcmp(wb_robot_get_name(), "CHARGER1") == 0) {
-    material = wb_supervisor_node_get_from_def(name1);    
+    chosenName = name1;
   } else if(strcmp(wb_robot_get_name(), "CHARGER2") == 0) {
-    material = wb_supervisor_node_get_from_def(name2);    
-  } 
+    chosenName = name2;
+  }
+
+  WbNodeRef material = wb_supervisor_node_get_from_def(chosenName);
 
   WbFieldRef diffuse_color = wb_supervisor_node_get_field(material, "diffuseColor");
   wb_supervisor_field_set_sf_color(diffuse_color, colors);
 }
 
-void set_to_discharged() {  
+void set_to_discharged() {
   const double INITIAL[3] = { 1, 0, 0 };
-  set_color_field(INITIAL);  
+  set_color_field(INITIAL);
 }
 
-void set_to_charged() {  
+void set_to_charged() {
   const double INITIAL[3] = { 0, 0.7, 1 };
   set_color_field(INITIAL);
 }
@@ -63,7 +64,7 @@ WbDeviceTag RECEIVER;
 void get_emitter() {
   EMITTER = wb_robot_get_device("emitter");
   wb_emitter_set_range(EMITTER, 0.15);
-  
+
   int channel = wb_emitter_get_channel(EMITTER);
   if (channel != EMITT_CHANNEL) {
     wb_emitter_set_channel(EMITTER, EMITT_CHANNEL);
@@ -75,7 +76,7 @@ void get_receiver() {
   wb_receiver_enable(RECEIVER, TIME_STEP);
   int channel = wb_receiver_get_channel(RECEIVER);
   if (channel != RECEIVE_CHANNEL) {
-    wb_receiver_get_channel(RECEIVER, RECEIVE_CHANNEL);
+    wb_receiver_set_channel(RECEIVER, RECEIVE_CHANNEL);
   }
 }
 
@@ -83,7 +84,7 @@ int message_number = 0;
 
 void emitt_message() {
   message_number++;
-  const char message[15];
+  char message[15];
 
   sprintf(message, "%d", message_number);
   //printf("Sending message ");
@@ -95,9 +96,8 @@ void emitt_message() {
 void receive_message() {
   /* is there at least one packet in the receiver's queue ? */
   if (wb_receiver_get_queue_length(RECEIVER) > 0) {
-
         /* read current packet's data */
-      const char *buffer = wb_receiver_get_data(RECEIVER);    
+      // const char *buffer = wb_receiver_get_data(RECEIVER);
       //printf("ACK Received\n"); //%s\"\n", buffer);
       energy--;
         /* fetch next packet */
@@ -122,26 +122,26 @@ int main(int argc, char **argv)
    * Perform simulation steps of TIME_STEP milliseconds
    * and leave the loop when the simulation is over
    */
-  
+
   double time = wb_robot_get_time();
   double discharged_time = -1;
-     
+
   while (wb_robot_step(TIME_STEP) != -1) {
 
     receive_message();
 
     double current_time = wb_robot_get_time();
-    if (current_time - time > 1) {  
+    if (current_time - time > 1) {
 
       time = current_time;
-     
+
       if (energy > 0) {
         emitt_message();
       }
 
       if (energy <= 0 && discharged_time == -1) {
         set_to_discharged();
-        discharged_time = wb_robot_get_time();  
+        discharged_time = wb_robot_get_time();
       }
 
       if (discharged_time != -1) {
@@ -156,17 +156,17 @@ int main(int argc, char **argv)
             discharged_time = -1;
         }
       }
-        
-      
+
+
       //printf("Energy: ");
-      //printf("%d\n", energy); 
-    }   
+      //printf("%d\n", energy);
+    }
   }
-  
+
   /* Enter your cleanup code here */
-  
+
   /* This is necessary to cleanup webots resources */
   wb_robot_cleanup();
-  
+
   return 0;
 }

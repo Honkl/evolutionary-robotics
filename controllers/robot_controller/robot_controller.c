@@ -17,12 +17,27 @@
 #include <webots/led.h>
 #include <webots/robot.h>
 #include <webots/nodes.h>
+#include "../advanced_genetic_algorithm_supervisor/genotype.h"
+#include "../advanced_genetic_algorithm_supervisor/genotype.c"
+#include "../advanced_genetic_algorithm_supervisor/random.h"
+#include "../advanced_genetic_algorithm_supervisor/random.c"
 
 /* Device stuff */
 #define DISTANCE_SENSORS_NUMBER 8
-#define NUM_INPUT 4
+#define CAMERA_WIDTH 4
+#define CAMERA_HEIGHT 1
+#define PROXIMITY_SENSORS 4
 #define NUM_HIDDEN 3
 #define NUM_OUTPUT 2
+#define NUM_INPUT CAMERA_WIDTH * CAMERA_HEIGHT * 3 + PROXIMITY_SENSORS
+#define GENOTYPE_SIZE (NUM_INPUT*NUM_HIDDEN + NUM_HIDDEN*NUM_OUTPUT + NUM_HIDDEN + NUM_OUTPUT)
+
+static double W1[NUM_HIDDEN][NUM_INPUT];
+static double W2[NUM_OUTPUT][NUM_HIDDEN];
+static double b1[NUM_HIDDEN];
+static double b2[NUM_OUTPUT];
+
+static const char *GENOTYPE_FILE_NAME = "../advanced_genetic_algorithm_supervisor/genotype.txt";
 
 static WbDeviceTag distance_sensors[DISTANCE_SENSORS_NUMBER];
 static double distance_sensors_values[DISTANCE_SENSORS_NUMBER];
@@ -53,48 +68,76 @@ static const char *leds_names[LEDS_NUMBER] = {
 #define TIME_STEP 64
 static double speeds[2];
 
-/* Breitenberg stuff */
-static double weights[DISTANCE_SENSORS_NUMBER][2] = {
-  {-2.0, -1.6},
-  {-2.0, -1.6},
-  {-0.8, 0.8},
-  {0.0, 0.0},
-  {0.0, 0.0},
-  {0.8, -0.8},
-  {-1.2, -1.6},
-  {-1.2, -1.6}
-};
-static double offsets[2] = {
-  0.5*MAX_SPEED, 0.5*MAX_SPEED
-};
-
 static int epuck_energy = 10;
 static int EMITT_CHANNEL = 2;
 static int RECEIVE_CHANNEL = 1;
 static WbDeviceTag EMITTER;
 static WbDeviceTag RECEIVER;
 
-static double * forwardPass(double input[NUM_INPUT], double W1[NUM_HIDDEN][NUM_INPUT], 
-    double W2[NUM_OUTPUT][NUM_HIDDEN], double b1[NUM_HIDDEN], double b2[NUM_OUTPUT]) {
+static void kurvakurvakurvakurva(){
+    printf("KURVAKURVAKURVAKURVA");
+}
+
+static int genotype_to_matrices(Genotype g){
+    printf("INSIDE GENOTYPE READING");
+    const double *genes = genotype_get_genes(g);
+    int cur = 0;
+    int i;
+    int j;
+    return 88;
+    for(i=0;i<NUM_HIDDEN; i++)
+    {
+        for(j=0;j<NUM_INPUT; j++)
+        {
+            W1[i][j] = genes[cur++];
+            printf("W1[%d][%d]: %f", i, j, W1[i][j]);
+        }
+    }
+
+    for(i=0;i<NUM_OUTPUT; i++)
+    {
+        for(j=0;j<NUM_HIDDEN; j++)
+        {
+            W2[i][j] = genes[cur++];
+            printf("W2[%d][%d]: %f", i, j, W2[i][j]);
+        }
+    }
+
+    for(i=0;i<NUM_OUTPUT; i++)
+    {
+        b2[i] = genes[cur++];
+        printf("b2[%d]: %f", i, b2[i]);
+    }
+
+    for(i=0;i<NUM_HIDDEN; i++)
+    {
+        b1[i] = genes[cur++];
+        printf("b1[%d]: %f", i, b1[i]);
+    }
+
+    return 99;
+}
+
+static double * forwardPass(double input[NUM_INPUT]) {
 
     int row, column;
     double output_hidden[NUM_HIDDEN];
     for (column = 0; column < NUM_HIDDEN; column++) {
-        output_hidden[column] = 0;    
+        output_hidden[column] = 0;
     }
 
     double * output = (double*) malloc(NUM_OUTPUT * sizeof(double));;
     for (column = 0; column < NUM_OUTPUT; column++) {
-        output[column] = 0;    
+        output[column] = 0;
     }
-    
+
     // x * W1
     for (row = 0; row < NUM_HIDDEN; row++) {
         for (column = 0; column < NUM_INPUT; column++) {
             output_hidden[row] = output_hidden[row] + W1[row][column]*input[column];
         }
     }
-    
+
     // output_hidden = tanh( x * W1 + b1)
     for (column = 0; column < NUM_HIDDEN; column++) {
         output_hidden[column] = tanh(output_hidden[column] + b1[column]);
@@ -129,12 +172,12 @@ static void step() {
   }
 }
 
-static void passive_wait(double sec) {
-  double start_time = wb_robot_get_time();
-  do {
-    step();
-  } while(start_time + sec > wb_robot_get_time());
-}
+// static void passive_wait(double sec) {
+//   double start_time = wb_robot_get_time();
+//   do {
+//     step();
+//   } while(start_time + sec > wb_robot_get_time());
+// }
 
 static void init_devices() {
   int i;
@@ -214,18 +257,37 @@ static void blink_leds() {
 }
 
 static void run_braitenberg() {
-  int i, j;
-  for (i=0; i<2; i++) {
-    speeds[i] = 0.0;
-    for (j=0; j<DISTANCE_SENSORS_NUMBER; j++)
-      speeds[i] += distance_sensors_values[j] * weights[j][i];
+  printf("Run breitenberg");
 
-    speeds[i] = offsets[i] + speeds[i]*MAX_SPEED;
-    if (speeds[i] > MAX_SPEED)
-      speeds[i] = MAX_SPEED;
-    else if (speeds[i] < -MAX_SPEED)
-      speeds[i] = -MAX_SPEED;
+  double nn_input[NUM_INPUT];
+
+  WbDeviceTag camera = wb_robot_get_device("camera");
+  const unsigned char *image = wb_camera_get_image(camera);
+  for (int x = 0; x < CAMERA_WIDTH; x++)
+    for (int y = 0; y < CAMERA_HEIGHT; y++) {
+      int r = wb_camera_image_get_red(image, CAMERA_WIDTH, x, y);
+      int g = wb_camera_image_get_green(image, CAMERA_WIDTH, x, y);
+      int b = wb_camera_image_get_blue(image, CAMERA_WIDTH, x, y);
+      //printf("[%d, %d]: red=%d, green=%d, blue=%d",x, y, r, g, b);
+      nn_input[3 * (y + x * CAMERA_HEIGHT)] = r;
+      nn_input[3 * (y + x * CAMERA_HEIGHT) + 1] = g;
+      nn_input[3 * (y + x * CAMERA_HEIGHT) + 2] = b;
   }
+
+  // + 4 front proximity sensors (ps6, ps7, ps0, ps1)
+  // proximity sensors values are updated each tick in the main while cycle
+  // proximity values are normalized to interval [0,1] (see get_sensor_input())
+  nn_input[3 * CAMERA_HEIGHT * CAMERA_WIDTH] = distance_sensors_values[0]; //ps0
+  nn_input[3 * CAMERA_HEIGHT * CAMERA_WIDTH + 1] = distance_sensors_values[1]; //ps1
+  nn_input[3 * CAMERA_HEIGHT * CAMERA_WIDTH + 2] = distance_sensors_values[2]; //ps6
+  nn_input[3 * CAMERA_HEIGHT * CAMERA_WIDTH + 3] = distance_sensors_values[3]; //ps7
+
+  double* nn_result = forwardPass(nn_input);
+
+  speeds[0] = nn_result[0] * MAX_SPEED;
+  speeds[1] = nn_result[1] * MAX_SPEED;
+
+  free(nn_result);
 }
 
 static void go_backwards() {
@@ -269,7 +331,7 @@ static void receive_message() {
   while (wb_receiver_get_queue_length(RECEIVER) > 0) {
 
         /* read current packet's data */
-      const char *buffer = wb_receiver_get_data(RECEIVER);
+      // const char *buffer = wb_receiver_get_data(RECEIVER);
       //printf("E-puck recharged %s\n", buffer);
       epuck_energy++;
       emitt_message();
@@ -279,22 +341,22 @@ static void receive_message() {
   }
 }
 
-static char* read_line_from_file(char* file_name) {  
-  FILE *infile = fopen(file_name, "r");
-  if (! infile) {
-    printf("unable to read %s\n", file_name);
-    return;
-  }
+// static char* read_line_from_file(char* file_name) {
+//   FILE *infile = fopen(file_name, "r");
+//   if (! infile) {
+//     printf("unable to read %s\n", file_name);
+//     return "";
+//   }
 
-  char line[256];
-  char* result = malloc(sizeof(char));
-  while (fgets(line, sizeof(line), infile)) {
-  }
-  fclose(infile);
+//   char line[256];
+//   char* result = malloc(sizeof(char));
+//   while (fgets(line, sizeof(line), infile)) {
+//   }
+//   fclose(infile);
 
-  result = &line;
-  return result;
-}
+//   result = &line;
+//   return result;
+// }
 
 static void write_fitness_to_file() {
   const char* file_name = "../advanced_genetic_algorithm_supervisor/fitness.txt";
@@ -307,7 +369,7 @@ static void write_fitness_to_file() {
 int main(int argc, char **argv) {
   wb_robot_init();
 
-  init_devices();  
+  init_devices();
   get_emitter();
   get_receiver();
 
@@ -316,9 +378,24 @@ int main(int argc, char **argv) {
 
   printf("E-puck robot controller started...\n");
 
-  const char* file_name = "../advanced_genetic_algorithm_supervisor/genotype.txt";
-  const char* neural_network = read_line_from_file(file_name); // contains our genotype (neural network)
-  printf("Neural network: %s", neural_network);
+  // const char* file_name = "../advanced_genetic_algorithm_supervisor/genotype.txt";
+  // const char* neural_network = read_line_from_file(file_name); // contains our genotype (neural network)
+  // printf("Neural network: %s", neural_network);
+  // genotype_set_size(GENOTYPE_SIZE);
+  // FILE *infile = fopen(GENOTYPE_FILE_NAME, "r");
+  // printf("kurva 5\n");
+  // if (! infile) {
+  //     printf("kurva 6\n");
+  //   printf("unable to read %s\n", GENOTYPE_FILE_NAME);
+  //   return 22;
+  // }
+  // Genotype genotype = genotype_create();
+  // genotype_fread(genotype, infile);
+  // fclose(infile);
+  printf("READING GENOTYPE TO MATRICESxxx1231231232\n");
+  kurvakurvakurvakurva();
+  // int x = genotype_to_matrices(genotype);
+  printf("BEZ DO PICE");
 
   double time = wb_robot_get_time();
   while (wb_robot_step(TIME_STEP) != -1) {
