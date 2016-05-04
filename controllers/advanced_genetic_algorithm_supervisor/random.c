@@ -10,7 +10,11 @@ double random_get_uniform() {
   return (double)rand() / RAND_MAX;
 }
 
-// polar form of the Box-Muller transformation 
+double random_get_uniform_negative() {
+  return 2.0 * ((double)rand() / RAND_MAX) - 1.0;
+}
+
+// polar form of the Box-Muller transformation
 double random_get_gaussian() {
   double x1, x2, w;
   do {

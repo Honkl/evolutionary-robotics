@@ -9,6 +9,8 @@ int random_get_integer(int max);
 // returns a random number between [0;1] from a uniform distribution
 double random_get_uniform();
 
+double random_get_uniform_negative();
+
 // returns a random number from a Gaussian distribution with mean 0 and standard deviation 1
 double random_get_gaussian();
 

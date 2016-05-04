@@ -18,8 +18,8 @@
 #define PROXIMITY_SENSORS 4
 #define NUM_HIDDEN 3
 #define NUM_OUTPUT 2
-#define NUM_INPUT CAMERA_WIDTH * CAMERA_HEIGHT * 3 + PROXIMITY_SENSORS
-#define GENOTYPE_SIZE (NUM_INPUT*NUM_HIDDEN + NUM_HIDDEN*NUM_OUTPUT + NUM_HIDDEN + NUM_OUTPUT)
+#define NUM_INPUT ((CAMERA_WIDTH * CAMERA_HEIGHT * 3) + PROXIMITY_SENSORS) // 16
+#define GENOTYPE_SIZE ((NUM_INPUT*NUM_HIDDEN) + (NUM_HIDDEN*NUM_OUTPUT) + NUM_HIDDEN + NUM_OUTPUT)
 
 static const int POPULATION_SIZE = 50;
 static const int NUM_GENERATIONS = 25;
@@ -29,7 +29,6 @@ static const char *GENOTYPE_FILE_NAME = "../advanced_genetic_algorithm_superviso
 // must match the values in the advanced_genetic_algorithm.c code
 static const int NUM_SENSORS = 8;
 static const int NUM_WHEELS  = 2;
-#define GENOTYPE_SIZE (NUM_INPUT*NUM_HIDDEN + NUM_HIDDEN*NUM_OUTPUT + NUM_HIDDEN + NUM_OUTPUT)
 
 // index access
 enum { X, Y, Z };
@@ -50,7 +49,7 @@ static double robot_rot0[4];    // a rotation needs 4 doubles
 
 // start with a demo until the user presses the 'O' key
 // (change this if you want)
-static bool demo = true;
+static bool demo = false;
 
 void draw_scaled_line(int generation, double y1, double y2) {
   const double XSCALE = (double)display_width / NUM_GENERATIONS;
@@ -79,11 +78,6 @@ void plot_fitness(int generation, double best_fitness, double average_fitness) {
 void run_seconds(double seconds) {
   int i, n = 1000.0 * seconds / time_step;
   for (i = 0; i < n; i++) {
-    if (demo && wb_robot_keyboard_get_key() == 'O') {
-      demo = false;
-      return; // interrupt demo and start GA optimization
-    }
-
     wb_robot_step(time_step);
   }
 }
@@ -168,6 +162,9 @@ void evaluate_genotype(Genotype genotype) {
 
   wb_supervisor_field_set_sf_vec3f(robot_translation, robot_trans0);
   wb_supervisor_field_set_sf_rotation(robot_rotation, robot_rot0);
+
+  const char* message = "RESET";
+  wb_emitter_send(emitter, message, strlen(message) + 1);
 
   // evaluation genotype during one minute
   run_seconds(60.0);
@@ -267,6 +264,7 @@ int main(int argc, const char *argv[]) {
   wb_display_draw_text(display, "fitness", 2, 2);
 
   // initial population
+  printf("GENOTYP SIZE %d INPU_SIZE %d EXP %d HIDDEN %d", GENOTYPE_SIZE, NUM_INPUT, ((NUM_INPUT*NUM_HIDDEN)), NUM_HIDDEN);
   population = population_create(POPULATION_SIZE, GENOTYPE_SIZE);
 
   // find robot node and store initial position and orientation
@@ -276,9 +274,6 @@ int main(int argc, const char *argv[]) {
 
   memcpy(robot_trans0, wb_supervisor_field_get_sf_vec3f(robot_translation), sizeof(robot_trans0));
   memcpy(robot_rot0, wb_supervisor_field_get_sf_rotation(robot_rotation), sizeof(robot_rot0));
-
-  if (demo)
-    run_demo();
 
   // run GA optimization
   run_optimization();

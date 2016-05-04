@@ -23,7 +23,7 @@
 /*
  * You may want to add macros here.
  */
-#define TIME_STEP 64
+#define TIME_STEP 128
 
 int NUMBER_OF_CHARGERS = 2;
 int CHARGERS_NAME_LENGTH = 8;

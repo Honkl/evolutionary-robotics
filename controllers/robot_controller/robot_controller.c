@@ -29,8 +29,8 @@
 #define PROXIMITY_SENSORS 4
 #define NUM_HIDDEN 3
 #define NUM_OUTPUT 2
-#define NUM_INPUT CAMERA_WIDTH * CAMERA_HEIGHT * 3 + PROXIMITY_SENSORS
-#define GENOTYPE_SIZE (NUM_INPUT*NUM_HIDDEN + NUM_HIDDEN*NUM_OUTPUT + NUM_HIDDEN + NUM_OUTPUT)
+#define NUM_INPUT ((CAMERA_WIDTH * CAMERA_HEIGHT * 3) + PROXIMITY_SENSORS) // 16
+#define GENOTYPE_SIZE ((NUM_INPUT*NUM_HIDDEN) + (NUM_HIDDEN*NUM_OUTPUT) + NUM_HIDDEN + NUM_OUTPUT)
 
 static double W1[NUM_HIDDEN][NUM_INPUT];
 static double W2[NUM_OUTPUT][NUM_HIDDEN];
@@ -65,7 +65,7 @@ static const char *leds_names[LEDS_NUMBER] = {
 #define LEFT 0
 #define RIGHT 1
 #define MAX_SPEED 1000.0
-#define TIME_STEP 64
+#define TIME_STEP 128
 static double speeds[2];
 
 static int epuck_energy = 10;
@@ -74,17 +74,11 @@ static int RECEIVE_CHANNEL = 1;
 static WbDeviceTag EMITTER;
 static WbDeviceTag RECEIVER;
 
-static void kurvakurvakurvakurva(){
-    printf("KURVAKURVAKURVAKURVA");
-}
-
-static int genotype_to_matrices(Genotype g){
-    printf("INSIDE GENOTYPE READING");
+static void genotype_to_matrices(Genotype g){
     const double *genes = genotype_get_genes(g);
     int cur = 0;
     int i;
     int j;
-    return 88;
     for(i=0;i<NUM_HIDDEN; i++)
     {
         for(j=0;j<NUM_INPUT; j++)
@@ -114,8 +108,20 @@ static int genotype_to_matrices(Genotype g){
         b1[i] = genes[cur++];
         printf("b1[%d]: %f", i, b1[i]);
     }
+}
 
-    return 99;
+
+static void reload_genotype(){
+  genotype_set_size(GENOTYPE_SIZE);
+  FILE *infile = fopen(GENOTYPE_FILE_NAME, "r");
+  if (! infile) {
+    printf("unable to read %s\n", GENOTYPE_FILE_NAME);
+    return;
+  }
+  Genotype genotype = genotype_create();
+  genotype_fread(genotype, infile);
+  fclose(infile);
+  genotype_to_matrices(genotype);
 }
 
 static double * forwardPass(double input[NUM_INPUT]) {
@@ -172,12 +178,12 @@ static void step() {
   }
 }
 
-// static void passive_wait(double sec) {
-//   double start_time = wb_robot_get_time();
-//   do {
-//     step();
-//   } while(start_time + sec > wb_robot_get_time());
-// }
+static void passive_wait(double sec) {
+  double start_time = wb_robot_get_time();
+  do {
+    step();
+  } while(start_time + sec > wb_robot_get_time());
+}
 
 static void init_devices() {
   int i;
@@ -269,9 +275,9 @@ static void run_braitenberg() {
       int g = wb_camera_image_get_green(image, CAMERA_WIDTH, x, y);
       int b = wb_camera_image_get_blue(image, CAMERA_WIDTH, x, y);
       //printf("[%d, %d]: red=%d, green=%d, blue=%d",x, y, r, g, b);
-      nn_input[3 * (y + x * CAMERA_HEIGHT)] = r;
-      nn_input[3 * (y + x * CAMERA_HEIGHT) + 1] = g;
-      nn_input[3 * (y + x * CAMERA_HEIGHT) + 2] = b;
+      nn_input[3 * (y + x * CAMERA_HEIGHT)] = r / 255;
+      nn_input[3 * (y + x * CAMERA_HEIGHT) + 1] = g / 255;
+      nn_input[3 * (y + x * CAMERA_HEIGHT) + 2] = b / 255;
   }
 
   // + 4 front proximity sensors (ps6, ps7, ps0, ps1)
@@ -286,6 +292,8 @@ static void run_braitenberg() {
 
   speeds[0] = nn_result[0] * MAX_SPEED;
   speeds[1] = nn_result[1] * MAX_SPEED;
+
+  printf("speed left %f speed right %f", speeds[0], speeds[1]);
 
   free(nn_result);
 }
@@ -330,14 +338,19 @@ static void receive_message() {
   /* is there at least one packet in the receiver's queue ? */
   while (wb_receiver_get_queue_length(RECEIVER) > 0) {
 
-        /* read current packet's data */
-      // const char *buffer = wb_receiver_get_data(RECEIVER);
+    /* read current packet's data */
+  	const char *buffer = wb_receiver_get_data(RECEIVER);
+
+  	if(strcmp(buffer, "RESET")==0){
+  		reload_genotype();
+  	} else {
       //printf("E-puck recharged %s\n", buffer);
       epuck_energy++;
       emitt_message();
+    }
 
-        /* fetch next packet */
-      wb_receiver_next_packet(RECEIVER);
+    /* fetch next packet */
+    wb_receiver_next_packet(RECEIVER);
   }
 }
 
@@ -376,29 +389,15 @@ int main(int argc, char **argv) {
   WbDeviceTag camera = wb_robot_get_device("camera");
   wb_camera_enable(camera,100);
 
+  passive_wait(0.1);
+
   printf("E-puck robot controller started...\n");
 
-  // const char* file_name = "../advanced_genetic_algorithm_supervisor/genotype.txt";
-  // const char* neural_network = read_line_from_file(file_name); // contains our genotype (neural network)
-  // printf("Neural network: %s", neural_network);
-  // genotype_set_size(GENOTYPE_SIZE);
-  // FILE *infile = fopen(GENOTYPE_FILE_NAME, "r");
-  // printf("kurva 5\n");
-  // if (! infile) {
-  //     printf("kurva 6\n");
-  //   printf("unable to read %s\n", GENOTYPE_FILE_NAME);
-  //   return 22;
-  // }
-  // Genotype genotype = genotype_create();
-  // genotype_fread(genotype, infile);
-  // fclose(infile);
-  printf("READING GENOTYPE TO MATRICESxxx1231231232\n");
-  kurvakurvakurvakurva();
-  // int x = genotype_to_matrices(genotype);
-  printf("BEZ DO PICE");
+  reload_genotype();
 
   double time = wb_robot_get_time();
   while (wb_robot_step(TIME_STEP) != -1) {
+  	printf("inside while\n");
     reset_actuator_values();
     get_sensor_input();
 

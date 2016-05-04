@@ -19,6 +19,7 @@ int genotype_get_size() {
 }
 
 void genotype_set_size(int size) {
+  printf("setting genotype size %d", size);
   genotype_size = size;
 }
 
@@ -31,8 +32,8 @@ Genotype genotype_create() {
   // initialize with random uniform numbers in the range [0,1]
   int i;
   for (i = 0; i < genotype_size; i++)
-    gen->genes[i] = random_get_uniform();
-    
+    gen->genes[i] = random_get_uniform_negative();
+
   return gen;
 }
 
@@ -63,7 +64,7 @@ void genotype_mutate(Genotype g) {
 
 // crossover
 Genotype genotype_crossover(Genotype parent1, Genotype parent2) {
-  
+
   Genotype child = genotype_create();
 
   // choose random locus
@@ -83,7 +84,7 @@ Genotype genotype_crossover(Genotype parent1, Genotype parent2) {
       child->genes[i] = parent1->genes[i];
     else
       child->genes[i] = parent2->genes[i];
-  
+
   return child;
 }
 
@@ -112,6 +113,6 @@ void genotype_fwrite(Genotype g, FILE *fd) {
   int i;
   for (i = 0; i < genotype_size; i++)
     fprintf(fd, " %lf", g->genes[i]);
-    
+
   fprintf(fd, "\n");
 }

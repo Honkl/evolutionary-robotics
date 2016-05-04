@@ -7,5 +7,5 @@ maximizedDockId: -1
 centralWidgetVisible: 1
 orthographicViewHeight: 1.3842
 textFiles: 0 "controllers/robot_controller/robot_controller.c" "controllers/advanced_genetic_algorithm_supervisor/advanced_genetic_algorithm_supervisor.c" "controllers/charger_controller/charger_controller.c"
-renderingDevicePerspectives: 314;1;75;0.2;0.142961
-renderingDevicePerspectives: 82;1;0.49;0.409662;0.119739
+renderingDevicePerspectives: 82;1;0.49;0.387841;0.0616836
+renderingDevicePerspectives: 314;1;75;0.158281;0.0849057
