@@ -24,12 +24,14 @@
  * You may want to add macros here.
  */
 #define TIME_STEP 128
+#define RECHARGE_TIME 30 // sec
 
 int NUMBER_OF_CHARGERS = 2;
 int CHARGERS_NAME_LENGTH = 8;
 int EMITT_CHANNEL = 1;
 int RECEIVE_CHANNEL = 2;
 int energy = 5;
+
 const char* name1 = "CHARGER1.BODY.SHAPE.APPEREANCE.MATERIAL";
 const char* name2 = "CHARGER2.BODY.SHAPE.APPEREANCE.MATERIAL";
 
@@ -146,7 +148,7 @@ int main(int argc, char **argv)
 
       if (discharged_time != -1) {
         // 5 seconds to recharge this charger
-        if (wb_robot_get_time() - discharged_time > 5) {
+        if (wb_robot_get_time() - discharged_time > RECHARGE_TIME) {
             energy += 5;
 
             if (energy > 0) {

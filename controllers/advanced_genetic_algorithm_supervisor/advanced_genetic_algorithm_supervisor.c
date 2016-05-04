@@ -20,8 +20,9 @@
 #define NUM_OUTPUT 2
 #define NUM_INPUT ((CAMERA_WIDTH * CAMERA_HEIGHT * 3) + PROXIMITY_SENSORS) // 16
 #define GENOTYPE_SIZE ((NUM_INPUT*NUM_HIDDEN) + (NUM_HIDDEN*NUM_OUTPUT) + NUM_HIDDEN + NUM_OUTPUT)
+#define EVOLVE_TIME 120
 
-static const int POPULATION_SIZE = 50;
+static const int POPULATION_SIZE = 5;
 static const int NUM_GENERATIONS = 25;
 static const char *FILE_NAME = "fittest.txt";
 static const char *GENOTYPE_FILE_NAME = "../advanced_genetic_algorithm_supervisor/genotype.txt";
@@ -167,10 +168,11 @@ void evaluate_genotype(Genotype genotype) {
   wb_emitter_send(emitter, message, strlen(message) + 1);
 
   // evaluation genotype during one minute
-  run_seconds(60.0);
+  run_seconds(EVOLVE_TIME);
 
   // measure fitness
   double fitness = measure_fitness();
+  printf("Supervisor measure fitness: %f\n", fitness);
   genotype_set_fitness(genotype, fitness);
 
   printf("fitness: %g\n", fitness);

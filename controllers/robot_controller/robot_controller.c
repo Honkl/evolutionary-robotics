@@ -65,7 +65,7 @@ static const char *leds_names[LEDS_NUMBER] = {
 #define LEFT 0
 #define RIGHT 1
 #define MAX_SPEED 1000.0
-#define TIME_STEP 128
+#define TIME_STEP 256
 static double speeds[2];
 
 static int epuck_energy = 10;
@@ -84,7 +84,7 @@ static void genotype_to_matrices(Genotype g){
         for(j=0;j<NUM_INPUT; j++)
         {
             W1[i][j] = genes[cur++];
-            printf("W1[%d][%d]: %f", i, j, W1[i][j]);
+            //printf("W1[%d][%d]: %f", i, j, W1[i][j]);
         }
     }
 
@@ -93,20 +93,20 @@ static void genotype_to_matrices(Genotype g){
         for(j=0;j<NUM_HIDDEN; j++)
         {
             W2[i][j] = genes[cur++];
-            printf("W2[%d][%d]: %f", i, j, W2[i][j]);
+            //printf("W2[%d][%d]: %f", i, j, W2[i][j]);
         }
     }
 
     for(i=0;i<NUM_OUTPUT; i++)
     {
         b2[i] = genes[cur++];
-        printf("b2[%d]: %f", i, b2[i]);
+        //printf("b2[%d]: %f", i, b2[i]);
     }
 
     for(i=0;i<NUM_HIDDEN; i++)
     {
         b1[i] = genes[cur++];
-        printf("b1[%d]: %f", i, b1[i]);
+        //printf("b1[%d]: %f", i, b1[i]);
     }
 }
 
@@ -122,6 +122,8 @@ static void reload_genotype(){
   genotype_fread(genotype, infile);
   fclose(infile);
   genotype_to_matrices(genotype);
+
+  epuck_energy = 10;
 }
 
 static double * forwardPass(double input[NUM_INPUT]) {
@@ -263,8 +265,6 @@ static void blink_leds() {
 }
 
 static void run_braitenberg() {
-  printf("Run breitenberg");
-
   double nn_input[NUM_INPUT];
 
   WbDeviceTag camera = wb_robot_get_device("camera");
@@ -293,7 +293,7 @@ static void run_braitenberg() {
   speeds[0] = nn_result[0] * MAX_SPEED;
   speeds[1] = nn_result[1] * MAX_SPEED;
 
-  printf("speed left %f speed right %f", speeds[0], speeds[1]);
+  // printf("speed left %f speed right %f", speeds[0], speeds[1]);
 
   free(nn_result);
 }
@@ -334,6 +334,13 @@ static void emitt_message() {
   wb_emitter_send(EMITTER, message, strlen(message) + 1);
 }
 
+static void write_fitness_to_file() {
+  const char* file_name = "../advanced_genetic_algorithm_supervisor/fitness.txt";
+  FILE *outfile = fopen(file_name, "w");
+  fprintf(outfile, "%d", epuck_energy);
+  fclose(outfile);
+}
+
 static void receive_message() {
   /* is there at least one packet in the receiver's queue ? */
   while (wb_receiver_get_queue_length(RECEIVER) > 0) {
@@ -347,6 +354,8 @@ static void receive_message() {
       //printf("E-puck recharged %s\n", buffer);
       epuck_energy++;
       emitt_message();
+      // printf("Epuck energy: %d\n", epuck_energy);
+      write_fitness_to_file(); // TODO. After changing measure fitness move somewhere...
     }
 
     /* fetch next packet */
@@ -371,13 +380,7 @@ static void receive_message() {
 //   return result;
 // }
 
-static void write_fitness_to_file() {
-  const char* file_name = "../advanced_genetic_algorithm_supervisor/fitness.txt";
-  FILE *outfile = fopen(file_name, "w");
-  double my_fitness = 123;
-  fprintf(outfile, "%lf", my_fitness);
-  fclose(outfile);
-}
+
 
 int main(int argc, char **argv) {
   wb_robot_init();
@@ -397,7 +400,6 @@ int main(int argc, char **argv) {
 
   double time = wb_robot_get_time();
   while (wb_robot_step(TIME_STEP) != -1) {
-  	printf("inside while\n");
     reset_actuator_values();
     get_sensor_input();
 
@@ -417,9 +419,6 @@ int main(int argc, char **argv) {
       //printf("%d\n", epuck_energy);
       time = current_time;
     }
-
-    write_fitness_to_file();
-
   };
 
   return EXIT_SUCCESS;
