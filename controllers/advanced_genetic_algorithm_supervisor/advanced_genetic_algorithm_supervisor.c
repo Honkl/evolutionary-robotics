@@ -16,13 +16,13 @@
 #define CAMERA_WIDTH 4
 #define CAMERA_HEIGHT 1
 #define PROXIMITY_SENSORS 4
-#define NUM_HIDDEN 3
+#define NUM_HIDDEN 6
 #define NUM_OUTPUT 2
 #define NUM_INPUT ((CAMERA_WIDTH * CAMERA_HEIGHT * 3) + PROXIMITY_SENSORS) // 16
 #define GENOTYPE_SIZE ((NUM_INPUT*NUM_HIDDEN) + (NUM_HIDDEN*NUM_OUTPUT) + NUM_HIDDEN + NUM_OUTPUT)
 #define EVOLVE_TIME 120
 
-static const int POPULATION_SIZE = 5;
+static const int POPULATION_SIZE = 10;
 static const int NUM_GENERATIONS = 25;
 static const char *FILE_NAME = "fittest.txt";
 static const char *GENOTYPE_FILE_NAME = "../advanced_genetic_algorithm_supervisor/genotype.txt";

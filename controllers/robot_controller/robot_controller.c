@@ -27,7 +27,7 @@
 #define CAMERA_WIDTH 4
 #define CAMERA_HEIGHT 1
 #define PROXIMITY_SENSORS 4
-#define NUM_HIDDEN 3
+#define NUM_HIDDEN 6
 #define NUM_OUTPUT 2
 #define NUM_INPUT ((CAMERA_WIDTH * CAMERA_HEIGHT * 3) + PROXIMITY_SENSORS) // 16
 #define GENOTYPE_SIZE ((NUM_INPUT*NUM_HIDDEN) + (NUM_HIDDEN*NUM_OUTPUT) + NUM_HIDDEN + NUM_OUTPUT)
@@ -110,6 +110,12 @@ static void genotype_to_matrices(Genotype g){
     }
 }
 
+static void write_fitness_to_file() {
+  const char* file_name = "../advanced_genetic_algorithm_supervisor/fitness.txt";
+  FILE *outfile = fopen(file_name, "w");
+  fprintf(outfile, "%d", epuck_energy);
+  fclose(outfile);
+}
 
 static void reload_genotype(){
   genotype_set_size(GENOTYPE_SIZE);
@@ -124,6 +130,7 @@ static void reload_genotype(){
   genotype_to_matrices(genotype);
 
   epuck_energy = 10;
+  write_fitness_to_file();
 }
 
 static double * forwardPass(double input[NUM_INPUT]) {
@@ -332,13 +339,6 @@ static void emitt_message() {
   const char *message = "AKC";
   //printf("Sending ACK\n");
   wb_emitter_send(EMITTER, message, strlen(message) + 1);
-}
-
-static void write_fitness_to_file() {
-  const char* file_name = "../advanced_genetic_algorithm_supervisor/fitness.txt";
-  FILE *outfile = fopen(file_name, "w");
-  fprintf(outfile, "%d", epuck_energy);
-  fclose(outfile);
 }
 
 static void receive_message() {
