@@ -363,25 +363,6 @@ static void receive_message() {
   }
 }
 
-// static char* read_line_from_file(char* file_name) {
-//   FILE *infile = fopen(file_name, "r");
-//   if (! infile) {
-//     printf("unable to read %s\n", file_name);
-//     return "";
-//   }
-
-//   char line[256];
-//   char* result = malloc(sizeof(char));
-//   while (fgets(line, sizeof(line), infile)) {
-//   }
-//   fclose(infile);
-
-//   result = &line;
-//   return result;
-// }
-
-
-
 int main(int argc, char **argv) {
   wb_robot_init();
 

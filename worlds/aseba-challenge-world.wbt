@@ -26,6 +26,11 @@ DirectionalLight {
 RectangleArena {
   wallHeight 0.3
 }
+DEF BASIC E-puck {
+  translation 0.180542 0 -0.0360931
+  controller "basic_epuck"
+  emitter_channel 2
+}
 DEF GA Supervisor {
   children [
     Emitter {
